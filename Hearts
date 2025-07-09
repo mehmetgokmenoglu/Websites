@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Zeynep Kalpler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(120deg, #ffe0ec, #ffc3e3);
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #nameInput {
+            padding: 12px 20px;
+            font-size: 24px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            z-index: 10;
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8); /* Arka planı biraz şeffaf yap */
+        }
+
+        .heart {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: #ff69b4;
+            transform: rotate(-45deg);
+            opacity: 0;
+            pointer-events: none;
+            /* Animasyonlar JavaScript tarafından dinamik olarak atanacak */
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: inherit;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -60px;
+            left: 0;
+        }
+
+        .heart::after {
+            top: 0;
+            left: 60px;
+        }
+
+        /* Yeni Dinamik Animasyon */
+        @keyframes heartAnimation {
+            0% {
+                left: var(--start-x);
+                top: var(--start-y);
+                transform: rotate(-45deg) scale(0.2); /* Başlangıçta küçük */
+                opacity: 0.8;
+            }
+            50% { /* Yarısında biraz büyüyüp titreşsin */
+                transform: rotate(-45deg) scale(1.1);
+            }
+            100% {
+                left: var(--end-x);
+                top: var(--end-y);
+                transform: rotate(-45deg) scale(1.0); /* Ortada sabit boyuta ulaşsın */
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <input type="text" id="nameInput" placeholder="Zeynep yaz ve keyfine bak! ❤️" />
+
+    <script>
+        const input = document.getElementById('nameInput');
+        let heartInterval = null;
+
+        input.addEventListener('input', () => {
+            const val = input.value.trim().toLowerCase();
+
+            if (val === 'zeynep') {
+                if (!heartInterval) {
+                    heartInterval = setInterval(spawnHearts, 100); // Biraz daha yavaşlatıldı (100ms)
+                }
+            } else {
+                clearInterval(heartInterval);
+                heartInterval = null;
+                document.querySelectorAll('.heart').forEach(h => h.remove()); // Zeynep değilse kalpleri temizle
+            }
+        });
+
+        function spawnHearts() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+
+            const kalpBoyutu = 120; // CSS'teki width/height ile aynı
+            const kenarPayi = 0; // Kalplerin ekranın en kenarından başlaması için 0
+            
+            const randomEdge = Math.floor(Math.random() * 4); // 0: üst, 1: sağ, 2: alt, 3: sol
+
+            let startX, startY;
+            const endX = window.innerWidth / 2 - kalpBoyutu / 2 + (Math.random() * 100 - 50); // Ortaya yakın rastgele x
+            const endY = window.innerHeight / 2 - kalpBoyutu / 2 + (Math.random() * 100 - 50); // Ortaya yakın rastgele y
+
+            switch (randomEdge) {
+                case 0: // Üst kenar
+                    startX = Math.random() * (window.innerWidth - kalpBoyutu);
+                    startY = -kalpBoyutu; // Ekranın tam üstünden başla
+                    break;
+                case 1: // Sağ kenar
+                    startX = window.innerWidth; // Ekranın tam sağından başla
+                    startY = Math.random() * (window.innerHeight - kalpBoyutu);
+                    break;
+                case 2: // Alt kenar
+                    startX = Math.random() * (window.innerWidth - kalpBoyutu);
+                    startY = window.innerHeight; // Ekranın tam altından başla
+                    break;
+                case 3: // Sol kenar
+                    startX = -kalpBoyutu; // Ekranın tam solundan başla
+                    startY = Math.random() * (window.innerHeight - kalpBoyutu);
+                    break;
+            }
+
+            heart.style.setProperty('--start-x', `${startX}px`);
+            heart.style.setProperty('--start-y', `${startY}px`);
+            heart.style.setProperty('--end-x', `${endX}px`);
+            heart.style.setProperty('--end-y', `${endY}px`);
+
+            // Animasyon ataması
+            heart.style.animation = `heartAnimation 4s ease-out forwards`; // Animasyon süresi ayarlandı
+
+            heart.style.backgroundColor = randomColor();
+
+            document.body.appendChild(heart);
+
+            heart.addEventListener('animationend', () => heart.remove());
+        }
+
+        function randomColor() {
+            const colors = ['#ff69b4', '#ff4da6', '#ff85a2', '#ff1493', '#ff6f91'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+    </script>
+
+</body>
+</html>
